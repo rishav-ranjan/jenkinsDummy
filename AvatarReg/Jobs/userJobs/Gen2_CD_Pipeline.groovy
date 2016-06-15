@@ -1,6 +1,6 @@
 //incoming parameters - serviceName, buildTrigger
 
-def serviceConfigBaseURL = "file:///home/ec2-user/pipelinePilot/avreg"
+def serviceConfigBaseURL = "file:///jdata/jenkins/pipelineConfig/avreg"
 def amiID
 def serviceCommitID
 def loadTestCommitID
