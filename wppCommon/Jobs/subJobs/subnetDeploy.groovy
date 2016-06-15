@@ -37,23 +37,23 @@ node('master'){
 
 node(targetNode) {
 	//git checkout before any writeFile
-    git credentialsId: "${gitCredentials}", url: "$url" 
+    git credentialsId: "${gitCredentials}", url: "${gitDeployURL}" 
 	
     //writing manipulated json to slave node
     writeFile file: "pideploy-${serviceName}-input${subnetNum}.json", text: content
     }
 node('master'){
     //fetching json file 2
-	getConfigFile(serviceConfigBaseURL,"wait-${serviceName}-input{subnetNum}.json")
+	getConfigFile(serviceConfigBaseURL,"wait-${serviceName}-input${subnetNum}.json")
     //File inputFile = new File("${masterWorkspace}/wait-${serviceName}-input{subnetNum}.json")
     //content = inputFile.text
-	stash includes: "wait-${serviceName}-input{subnetNum}.json", name: "wait-${serviceName}-input{subnetNum}.json"
+	stash includes: "wait-${serviceName}-input${subnetNum}.json", name: "wait-${serviceName}-input${subnetNum}.json"
 }
 
 node(targetNode){
     //writing json to slave node
     //writeFile file: "wait-${serviceName}-input${subnetNum}.json", text: content
-	unstash "wait-${serviceName}-input{subnetNum}.json"
+	unstash "wait-${serviceName}-input${subnetNum}.json"
     }
 node('master'){
     //fetching json file 3
@@ -76,4 +76,14 @@ node(targetNode){
     """*/
     def amiContent = "ami_id=${amiID}"
     writeFile file: "${serviceName}.log.amiid.tag", text: amiContent
+}
+
+
+def getConfigFile(baseURL,fileName) {
+    def workspace = pwd()
+    sh """mkdir -p "${workspace}"
+	"""
+    def file = new File("${workspace}/${fileName}").newOutputStream()  
+    file << new URL("${baseURL}/${fileName}").openStream()  
+    file.close()
 }

@@ -21,7 +21,7 @@ def amiName="${serviceName}_${artifactVersion}"
 def amiID
 def slaveWorkspaceDir
 def masterWorkspace
-
+def tempDir
 
 node(targetNode)
 {
@@ -37,6 +37,7 @@ node('master')
     File inputFile = new File("${masterWorkspace}/create_ami_${serviceName}.json")
     content = inputFile.text
     def slurped = new JsonSlurper().parseText(content)
+    tempDir = slurped.log.temp_dir
     def builder = new JsonBuilder(slurped)
     builder.content.aws.ami.tags[1].value="${commitID}"
     builder.content.aws.instance.id="${instanceID}"
@@ -78,14 +79,24 @@ node(targetNode)
     sudo chef-client -z -j ${slaveWorkspaceDir}/terminate_instance_${serviceName}.json -r 'recipe[ec2::terminateInstance]' --log_level info"""
 	
 	//get AMI ID from log file
-    def content = readFile file: "${serviceName}.log.serviceami"
+    def content = readFile file: "${tempDir}/${serviceName}.log.serviceami"
     def slurped = new JsonSlurper().parseText(content)
     amiID = slurped.ImageId
     println "AMI ID is ${amiID}"
 	
-    def amiContent = "avatar_reg_ami_id=${amiID}"
+    def amiContent = "${serviceName}_ami_id=${amiID}"
     writeFile file: "${serviceName}.log.amiidprop", text: amiContent
 }
 
 //return values - amiID
 currentBuild.setDescription("#amiID="+amiID)
+
+
+def getConfigFile(baseURL,fileName) {
+    def workspace = pwd()
+    sh """mkdir -p "${workspace}"
+	"""
+    def file = new File("${workspace}/${fileName}").newOutputStream()  
+    file << new URL("${baseURL}/${fileName}").openStream()  
+    file.close()
+}

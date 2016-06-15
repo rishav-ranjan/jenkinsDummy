@@ -7,6 +7,8 @@ def gitDeployURL
 def loadTestTargetNode
 node('master') {
 	def masterWorkspace = pwd()
+	sh """mkdir -p "${masterWorkspace}"
+	"""
 	getConfigFile(serviceConfigBaseURL,"serviceConfig.groovy")
 	serviceConfigFile = new File("${masterWorkspace}/serviceConfig.groovy")
 	def configObject = new ConfigSlurper().parse(serviceConfigFile.text)
@@ -16,8 +18,8 @@ node('master') {
 	gitCredentials=configObject.gitCredentials
 }
 
-def subnetNums=[1,2]
-for (subnetNum in subnetNums) {
+def subnetNums=2
+for (subnetNum=1;subnetNum<=subnetNums;subnetNum++) {
 	stage "${parentstageName}::DeploySubnet ${subnetNum}"
 	subJob = build  job: '../../wppCommon/subJobs/subnetDeploy',
             parameters: [
@@ -32,12 +34,13 @@ for (subnetNum in subnetNums) {
 }
 
 stage "${parentstageName}::runMicroLoadTest"
-subJob = build  job: '../../wppCommon/subJobs/runMicroLoadTest',
+/*subJob = build  job: '../../wppCommon/subJobs/runMicroLoadTest',
             parameters: [
 				[$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
 				[$class: 'StringParameterValue', name: 'loadTestTargetNode', value: loadTestTargetNode ],
                 ];
-
+*/
+sleep(10)
 				
 def getConfigFile(baseURL,fileName) {
     def workspace = pwd()

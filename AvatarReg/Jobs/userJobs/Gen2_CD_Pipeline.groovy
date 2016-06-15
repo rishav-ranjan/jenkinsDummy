@@ -1,6 +1,6 @@
 //incoming parameters - serviceName, buildTrigger
 
-def serviceConfigBaseURL = "file:///home/ec2-user/pipelinePilot/avreg"
+def serviceConfigBaseURL = "file:///jdata/jenkins/pipelineConfig/avreg"
 def amiID
 def serviceCommitID
 def loadTestCommitID
@@ -28,15 +28,16 @@ parallel(firstTask: {
 	//returned values
     loadTestCommitID = subJob2.description.tokenize('#')[2].tokenize('=')[1]
     })
-    
+sleep(10)
 
 stage "AcceptanceStage"
-job2 = build  job: '../subJobs/Acceptance_functionalTest',
+/*job2 = build  job: '../subJobs/Acceptance_functionalTest',
             parameters: [
                 [$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
                 [$class: 'StringParameterValue', name: 'amiID', value: amiID ],
 				[$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
-                ];
+                ];*/
+sleep(10)
 
 
 stage "CapacityStage"
@@ -60,4 +61,4 @@ job3 = build  job: '../subJobs/Integration',
                 
                 
 stage "ReleaseStage"
-    
+sleep(10)

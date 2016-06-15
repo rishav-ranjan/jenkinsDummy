@@ -1,0 +1,10 @@
+gitServiceURL = "https://github.com/WPPg2/avatar-reg"
+gitDeployURL = "https://github.com/WPPg2/DevOps-Deployment"
+gitLoadTestURL = "https://github.com/WPPg2/CTF"
+gitCredentials = "8cf0000b-3991-4db0-a2d9-e157168d2cef"
+deployAmiTargetNode = 'AMIBuilder'
+buildPublishTargetNode = 'Morpheus'
+loadTestTargetNode = 'MicroLoadTest'
+serviceRootPomPath = "."
+loadTestRootPomPath="LoadTests/avreg"
+mavenPath = "/opt/apache-maven-3.2.5/bin/mvn"

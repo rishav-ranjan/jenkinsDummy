@@ -12,13 +12,14 @@ def gitCredentials
 
 node('master') {
 	def masterWorkspace = pwd()
+	sh """mkdir -p "${masterWorkspace}"
+	"""
 	getConfigFile(serviceConfigBaseURL,"serviceConfig.groovy")
-	serviceConfigFile = new File("${masterWorkspace}/serviceConfig.groovy")
-	def configObject = new ConfigSlurper().parse(serviceConfigFile.text)
-	buildPublishTargetNode=configObject.buildPublishTargetNode
-	gitLoadTestURL=configObject.gitLoadTestURL
-	gitCredentials=configObject.gitCredentials
-	rootPomPath=configObject.loadTestRootPomPath
+	def values = getValues(new File("${masterWorkspace}/serviceConfig.groovy"))
+	buildPublishTargetNode=values[0]
+	gitLoadTestURL=values[1]
+	gitCredentials=values[2]
+	rootPomPath=values[3]
 }
 
 
@@ -46,4 +47,15 @@ def getConfigFile(baseURL,fileName) {
     def file = new File("${workspace}/${fileName}").newOutputStream()  
     file << new URL("${baseURL}/${fileName}").openStream()  
     file.close()
+}
+@NonCPS
+def getValues(serviceConfigFile)
+{
+    def configObject = new ConfigSlurper().parse(serviceConfigFile.text)
+    def values = new String[4]
+	values[0]=configObject.buildPublishTargetNode
+	values[1]=configObject.gitLoadTestURL
+	values[2]=configObject.gitCredentials
+	values[3]=configObject.loadTestRootPomPath
+	return (values)
 }

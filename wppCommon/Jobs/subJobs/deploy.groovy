@@ -14,6 +14,7 @@ def key
 def secret_file
 def content
 def logName
+def temp_dir
 def SlaveWorkspaceDir
 def masterWorkspace
 
@@ -56,6 +57,7 @@ node('master'){
     key=slurped2.aws.instance.key.local_path
     println "AWS key is ${key}"
     logName=slurped2.log.name
+    tempDir=slurped2.log.temp_dir
     println "logName is ${logName}"
 }
 
@@ -69,12 +71,12 @@ node (targetNode){
        """
 	   
     //get deployment IP
-    def ip_ad = readFile file: "${slaveWorkspaceDir}/${logName}.ipaddr"
+    def ip_ad = readFile file: "${tempDir}/${logName}.ipaddr"
     def ip_addr =ip_ad.trim()
     println "the IP address is ${ip_addr}"
 	
     //get instance id
-    def inst_id = readFile file: "${slaveWorkspaceDir}/${logName}.instid"
+    def inst_id = readFile file: "${tempDir}/${logName}.instid"
     def instanceID = inst_id.trim()
     println "${serviceName} Instance ID is ${instanceID}"
 	
@@ -88,6 +90,8 @@ node (targetNode){
 
 def getConfigFile(baseURL,fileName) {
     def workspace = pwd()
+    sh """mkdir -p "${workspace}"
+	"""
     def file = new File("${workspace}/${fileName}").newOutputStream()  
     file << new URL("${baseURL}/${fileName}").openStream()  
     file.close()

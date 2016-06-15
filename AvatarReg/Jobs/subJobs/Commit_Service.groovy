@@ -13,15 +13,19 @@ def parentstageName = "Commit"
 
 node('master') {
 	def masterWorkspace = pwd()
+	sh """mkdir -p "${masterWorkspace}"
+	"""
 	getConfigFile(serviceConfigBaseURL,"serviceConfig.groovy")
 	serviceConfigFile = new File("${masterWorkspace}/serviceConfig.groovy")
 	def configObject = new ConfigSlurper().parse(serviceConfigFile.text)
 	gitServiceURL=configObject.gitServiceURL
+	gitDeployURL=configObject.gitDeployURL
 	buildPublishTargetNode=configObject.buildPublishTargetNode
 	deployAmiTargetNode=configObject.deployAmiTargetNode
 	gitLoadTestURL=configObject.gitLoadTestURL
 	gitCredentials=configObject.gitCredentials
 	rootPomPath=configObject.serviceRootPomPath
+	configObject = null
 }
 
 stage "${parentstageName}::BuildAndPublish"
