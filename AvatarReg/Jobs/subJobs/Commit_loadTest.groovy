@@ -27,12 +27,12 @@ stage "${parentstageName}::BuildAndPublish"
 
     subJob1 = build  job: '../../wppCommon/subJobs/buildAndPublish',
                     parameters: [
-                        [$class: 'StringParameterValue', name: 'gitCredentials', value: gitCredentials ],
-                        [$class: 'StringParameterValue', name: 'url', value: gitLoadTestURL ],
-                        [$class: 'StringParameterValue', name: 'buildTrigger', value: buildTrigger ],
-                        [$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
-                        [$class: 'StringParameterValue', name: 'targetNode', value: buildPublishTargetNode ],
-                        [$class: 'StringParameterValue', name: 'rootPomPath', value: rootPomPath ],
+							[$class: 'StringParameterValue', name: 'gitCredentials', value: gitCredentials ],
+							[$class: 'StringParameterValue', name: 'url', value: gitLoadTestURL ],
+							[$class: 'StringParameterValue', name: 'buildTrigger', value: buildTrigger ],
+							[$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
+							[$class: 'StringParameterValue', name: 'targetNode', value: buildPublishTargetNode ],
+							[$class: 'StringParameterValue', name: 'rootPomPath', value: rootPomPath ],
                     ] ;
     
     // Return Values

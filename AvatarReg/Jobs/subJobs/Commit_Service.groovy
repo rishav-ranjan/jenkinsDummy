@@ -49,12 +49,12 @@ stage "${parentstageName}::BuildAndPublish"
 stage "${parentstageName}::Deploy"
     subJob2 = build  job: '../../wppCommon/subJobs/deploy',
                     parameters: [
-                        [$class: 'StringParameterValue', name: 'gitCredentials', value: gitCredentials ],
-                        [$class: 'StringParameterValue', name: 'url', value: gitDeployURL ],
-                        [$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
-                        [$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
-                        [$class: 'StringParameterValue', name: 'artifactURL', value: artifactURL ],
-                        [$class: 'StringParameterValue', name: 'targetNode', value: deployAmiTargetNode ],
+							[$class: 'StringParameterValue', name: 'gitCredentials', value: gitCredentials ],
+							[$class: 'StringParameterValue', name: 'url', value: gitDeployURL ],
+							[$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
+							[$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
+							[$class: 'StringParameterValue', name: 'artifactURL', value: artifactURL ],
+							[$class: 'StringParameterValue', name: 'targetNode', value: deployAmiTargetNode ],
                     ] ;
                     
     // Returned Values                
@@ -66,14 +66,14 @@ stage "${parentstageName}::Deploy"
 stage "${parentstageName}::CreateAMI"
     subJob3 = build  job: '../../wppCommon/subJobs/createAMI',
                      parameters: [
-                        [$class: 'StringParameterValue', name: 'gitCredentials', value: gitCredentials ],
-                        [$class: 'StringParameterValue', name: 'url', value: gitDeployURL ],
-                        [$class: 'StringParameterValue', name: 'artifactVersion', value: artifactVersion ],
-                        [$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
-                        [$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
-                        [$class: 'StringParameterValue', name: 'instanceID', value: instanceID ],
-                        [$class: 'StringParameterValue', name: 'commitID', value: commitID ],
-                        [$class: 'StringParameterValue', name: 'targetNode', value: deployAmiTargetNode ],
+							[$class: 'StringParameterValue', name: 'gitCredentials', value: gitCredentials ],
+							[$class: 'StringParameterValue', name: 'url', value: gitDeployURL ],
+							[$class: 'StringParameterValue', name: 'artifactVersion', value: artifactVersion ],
+							[$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
+							[$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
+							[$class: 'StringParameterValue', name: 'instanceID', value: instanceID ],
+							[$class: 'StringParameterValue', name: 'commitID', value: commitID ],
+							[$class: 'StringParameterValue', name: 'targetNode', value: deployAmiTargetNode ],
                     ] ;
 					
     // Returned Values                

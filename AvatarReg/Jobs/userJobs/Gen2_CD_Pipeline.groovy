@@ -33,9 +33,9 @@ sleep(10)
 stage "AcceptanceStage"
 /*job2 = build  job: '../subJobs/Acceptance_functionalTest',
             parameters: [
-                [$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
-                [$class: 'StringParameterValue', name: 'amiID', value: amiID ],
-				[$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
+					[$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
+					[$class: 'StringParameterValue', name: 'amiID', value: amiID ],
+					[$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
                 ];*/
 sleep(10)
 
@@ -43,9 +43,9 @@ sleep(10)
 stage "CapacityStage"
 job2 = build  job: '../subJobs/Capacity_loadTest',
             parameters: [
-                [$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
-                [$class: 'StringParameterValue', name: 'amiID', value: amiID ],
-				[$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
+					[$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
+					[$class: 'StringParameterValue', name: 'amiID', value: amiID ],
+					[$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
                 ];
 
 
@@ -53,9 +53,9 @@ job2 = build  job: '../subJobs/Capacity_loadTest',
 stage "IntegrationStage"
 job3 = build  job: '../subJobs/Integration',
             parameters: [
-                [$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
-                [$class: 'StringParameterValue', name: 'amiID', value: amiID ],
-				[$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
+					[$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
+					[$class: 'StringParameterValue', name: 'amiID', value: amiID ],
+					[$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
                 ];
                 
                 
