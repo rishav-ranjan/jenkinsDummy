@@ -7,13 +7,13 @@ import groovy.json.JsonSlurper
 //def serviceName="avreg"
 //def serviceConfigPath = "/home/ec2-user/avregPipPilot/pipeline/services"
 //def amiID = "ami-0a6f966a"
-//def subnetID
 //def subnetNum
 
 
 def content
 def content2
 def slaveWorkspaceDir
+def masterWorkspace
 
 node(targetNode)
 {
@@ -21,16 +21,14 @@ node(targetNode)
     slaveWorkspaceDir = pwd()
 }
 node('master'){
+	masterWorkspace = pwd()
+	getConfigFile(serviceConfigBaseURL,"pideploy-${serviceName}-input${subnetNum}.json")
     //manipulate json file 1
-    File inputFile = new File("${serviceConfigPath}/${serviceName}/pideploy-${serviceName}-input.json")
+    File inputFile = new File("${masterWorkspace}/pideploy-${serviceName}-input${subnetNum}.json")
     content = inputFile.text
     def slurped = new JsonSlurper().parseText(content)
     def builder = new JsonBuilder(slurped)
-    builder.content.stack.name = "pie-pod1-subnet${subnetNum}-${serviceName}"
     builder.content.stack.parameters[2].value = "${amiID}"
-    builder.content.stack.parameters[4].value = "[\"subnet-${subnetID}\"]"
-    builder.content.stack.template.path = "${slaveWorkspaceDir}/cloudformation/pie/templates/avatar-reg/AvatarReg.json"
-    builder.content.log.temp_dir = "${slaveWorkspaceDir}"
     content = builder.toPrettyString()
 	
     // null since non-serializable
@@ -46,42 +44,30 @@ node(targetNode) {
     }
 node('master'){
     //fetching json file 2
-    File inputFile = new File("${serviceConfigPath}/${serviceName}/wait-${serviceName}-input.json")
-    content = inputFile.text
-    def slurped = new JsonSlurper().parseText(content)
-    def builder = new JsonBuilder(slurped)
-    builder.content.stack.name = "pie-pod1-subnet${subnetNum}-${serviceName}"
-    content = builder.toPrettyString()
-	
-    // null since non-serializable
-    builder=null
+	getConfigFile(serviceConfigBaseURL,"wait-${serviceName}-input{subnetNum}.json")
+    //File inputFile = new File("${masterWorkspace}/wait-${serviceName}-input{subnetNum}.json")
+    //content = inputFile.text
+	stash includes: "wait-${serviceName}-input{subnetNum}.json", name: "wait-${serviceName}-input{subnetNum}.json"
 }
 
 node(targetNode){
-    //writing manipulated json to slave node
-    writeFile file: "wait-${serviceName}-input${subnetNum}.json", text: content
+    //writing json to slave node
+    //writeFile file: "wait-${serviceName}-input${subnetNum}.json", text: content
+	unstash "wait-${serviceName}-input{subnetNum}.json"
     }
 node('master'){
     //fetching json file 3
-    File inputFile = new File("${serviceConfigPath}/${serviceName}/getStackDetails-${serviceName}.json")
-    content = inputFile.text
-    def slurped = new JsonSlurper().parseText(content)
-    def builder = new JsonBuilder(slurped)
-    builder.content.stack.name = "pie-pod1-subnet${subnetNum}-${serviceName}"
-    builder.content.property_file.name = "pie-pod1-subnet${subnetNum}-${serviceName}.outputs"
-    builder.content.property_file.directory = "${slaveWorkspaceDir}"
-    builder.content.log.name = "pie-pod1-subnet${subnetNum}-${serviceName}.log"
-    builder.content.log.temp_dir = "${slaveWorkspaceDir}"
-    content = builder.toPrettyString()
-	
-    // null since non-serializable
-    builder=null
+	getConfigFile(serviceConfigBaseURL,"getStackDetails-${serviceName}${subnetNum}.json")
+    //File inputFile = new File("${masterWorkspace}/getStackDetails-${serviceName}${subnetNum}.json")
+    //content = inputFile.text
+	stash includes: "getStackDetails-${serviceName}${subnetNum}.json", name: "getStackDetails-${serviceName}${subnetNum}.json"
 }
 
+
 node(targetNode){
-	//writing manipulated json to slave node
-    writeFile file: "getStackDetails-${serviceName}${subnetNum}.json", text: content
-        
+	//writing json to slave node
+    //writeFile file: "getStackDetails-${serviceName}${subnetNum}.json", text: content
+    unstash "getStackDetails-${serviceName}${subnetNum}.json"  
     println "Deploying AvatarReg on 'PIE' stack. POD1-subnet1 with ami_id: ${amiID}"
     /*sh """cd ${slaveWorkspaceDir}/chef-repos/aws-manager-repo
     sudo chef-client -z -w -j ${slaveWorkspaceDir}/pideploy-${serviceName}-input${subnetNum}.json -r 'recipe[cloudformation::updateStack]' -l info

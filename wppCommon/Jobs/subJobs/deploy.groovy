@@ -1,22 +1,29 @@
-/*import groovy.json.JsonBuilder
+import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
 //incoming parameters
 //def url = "https://github.com/WPPg2/DevOps-Deployment"
 //def gitCredentials = "8cf0000b-3991-4db0-a2d9-e157168d2cef"
 //def serviceName="avreg"
-//def serviceConfigPath = "/home/ec2-user/avregPipPilot/pipeline/services"
+//def serviceConfigBaseURL
 //def artifactURL
 //def targetNode = 'AMIBuilder'
+
+
 def key
 def secret_file
 def content
 def logName
 def SlaveWorkspaceDir
+def masterWorkspace
+
+
 
 node('master'){
+	masterWorkspace = pwd()
+	getConfigFile(serviceConfigBaseURL,"deploy_${serviceName}_input.json")
     //manipulate json file 1
-    File inputFile = new File("${serviceConfigPath}/${serviceName}/deploy_${serviceName}_input.json")
+    File inputFile = new File("${masterWorkspace}/deploy_${serviceName}_input.json")
     content = inputFile.text
     def slurped = new JsonSlurper().parseText(content)
     secret_file = slurped.secretFile
@@ -40,21 +47,16 @@ node(targetNode){
     writeFile file: "deploy_${serviceName}_input.json", text: content
 }
 
-node('master'){ 
+node('master'){
+	getConfigFile(serviceConfigBaseURL,"deploy_${serviceName}.json")
 	//manipulate json file 2
-	File inputFile2 = new File("${serviceConfigPath}/${serviceName}/deploy_${serviceName}.json")
+	File inputFile2 = new File("${masterWorkspace}/deploy_${serviceName}.json")
     content = inputFile2.text
     def slurped2 = new JsonSlurper().parseText(content)
     key=slurped2.aws.instance.key.local_path
     println "AWS key is ${key}"
     logName=slurped2.log.name
     println "logName is ${logName}"
-    def builder2 = new JsonBuilder(slurped2)
-    builder2.content.log.temp_dir="${slaveWorkspaceDir}"
-    content = builder2.toPrettyString()
-	
-	// null since non-serializable
-    builder2=null
 }
 
 node (targetNode){
@@ -82,5 +84,11 @@ node (targetNode){
     //outgoing parameters- BUILD_TIMESTAMP,instanceID
     currentBuild.setDescription("#instanceID="+instanceID)
  
-}*/
-sleep(212)
+}
+
+def getConfigFile(baseURL,fileName) {
+    def workspace = pwd()
+    def file = new File("${workspace}/${fileName}").newOutputStream()  
+    file << new URL("${baseURL}/${fileName}").openStream()  
+    file.close()
+}

@@ -1,18 +1,32 @@
-//def gitServiceURL = "https://github.com/WPPg2/avatar-reg"
-//def gitCredentials = "8cf0000b-3991-4db0-a2d9-e157168d2cef"
+//incoming parameters
+//serviceConfigBaseURL
+//def serviceName = "avreg"
 //def buildTrigger = "NIGHTLY"
-//def serviceConfigPath = "/home/ec2-user/avregPipPilot/pipeline/services"
 
-def buildPublishTargetNode = 'Morpheus'
-def deployAmiTargetNode = 'AMIBuilder'
-def rootPomPath = "." 
+def buildPublishTargetNode
+def deployAmiTargetNode
+def rootPomPath
+def gitServiceURL
+def gitCredentials
+def gitLoadTestURL
 def parentstageName = "Commit"
 
-
+node('master') {
+	def masterWorkspace = pwd()
+	getConfigFile(serviceConfigBaseURL,"serviceConfig.groovy")
+	serviceConfigFile = new File("${masterWorkspace}/serviceConfig.groovy")
+	def configObject = new ConfigSlurper().parse(serviceConfigFile.text)
+	gitServiceURL=configObject.gitServiceURL
+	buildPublishTargetNode=configObject.buildPublishTargetNode
+	deployAmiTargetNode=configObject.deployAmiTargetNode
+	gitLoadTestURL=configObject.gitLoadTestURL
+	gitCredentials=configObject.gitCredentials
+	rootPomPath=configObject.serviceRootPomPath
+}
 
 stage "${parentstageName}::BuildAndPublish"
 
-    subJob1 = build  job: '../../wppCommon/subJobs/buildAndPublish'/*,
+    subJob1 = build  job: '../../wppCommon/subJobs/buildAndPublish',
                     parameters: [
                         [$class: 'StringParameterValue', name: 'gitCredentials', value: gitCredentials ],
                         [$class: 'StringParameterValue', name: 'url', value: gitServiceURL ],
@@ -27,32 +41,32 @@ stage "${parentstageName}::BuildAndPublish"
     def artifactVersion = subJob1.description.tokenize('#')[1].tokenize('=')[1]
     def commitID = subJob1.description.tokenize('#')[2].tokenize('=')[1]
 
-    */
+    
 stage "${parentstageName}::Deploy"
-    subJob2 = build  job: '../../wppCommon/subJobs/deploy'/*,
+    subJob2 = build  job: '../../wppCommon/subJobs/deploy',
                     parameters: [
                         [$class: 'StringParameterValue', name: 'gitCredentials', value: gitCredentials ],
                         [$class: 'StringParameterValue', name: 'url', value: gitDeployURL ],
                         [$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
-                        [$class: 'StringParameterValue', name: 'serviceConfigPath', value: serviceConfigPath ],
+                        [$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
                         [$class: 'StringParameterValue', name: 'artifactURL', value: artifactURL ],
                         [$class: 'StringParameterValue', name: 'targetNode', value: deployAmiTargetNode ],
                     ] ;
                     
     // Returned Values                
     def instanceID = subJob2.description.tokenize('#')[0].tokenize('=')[1]
-    println "the values are ${artifactURL}\t${artifactVersion}\t${instanceID}"*/
+    println "the values are ${artifactURL}\t${artifactVersion}\t${instanceID}"
     
     
     
 stage "${parentstageName}::CreateAMI"
-    subJob3 = build  job: '../../wppCommon/subJobs/createAMI'/*,
+    subJob3 = build  job: '../../wppCommon/subJobs/createAMI',
                      parameters: [
                         [$class: 'StringParameterValue', name: 'gitCredentials', value: gitCredentials ],
                         [$class: 'StringParameterValue', name: 'url', value: gitDeployURL ],
                         [$class: 'StringParameterValue', name: 'artifactVersion', value: artifactVersion ],
                         [$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
-                        [$class: 'StringParameterValue', name: 'serviceConfigPath', value: serviceConfigPath ],
+                        [$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
                         [$class: 'StringParameterValue', name: 'instanceID', value: instanceID ],
                         [$class: 'StringParameterValue', name: 'commitID', value: commitID ],
                         [$class: 'StringParameterValue', name: 'targetNode', value: deployAmiTargetNode ],
@@ -62,4 +76,11 @@ stage "${parentstageName}::CreateAMI"
     def amiID = subJob3.description.tokenize('#')[0].tokenize('=')[1]
 	
 	
-currentBuild.setDescription("#amiID="+amiID+"#commitID="+commitID)*/
+currentBuild.setDescription("#amiID="+amiID+"#commitID="+commitID)
+
+def getConfigFile(baseURL,fileName) {
+    def workspace = pwd()
+    def file = new File("${workspace}/${fileName}").newOutputStream()  
+    file << new URL("${baseURL}/${fileName}").openStream()  
+    file.close()
+} 

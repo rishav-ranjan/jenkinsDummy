@@ -4,7 +4,7 @@
 //def serviceName = "avreg"
 //def buildTrigger = "NIGHTLY"
 //def targetNode = 'Morpheus'
-/*
+
 def workspaceDir
 def pom
 def version
@@ -66,6 +66,5 @@ node(targetNode){
     currentBuild.setDescription("#artifactURL="+artifactURL+"#artifactVersion="+artifactVersion+"#commitID="+commitID)
 }
 
-*/
 
-sleep(125)
+
