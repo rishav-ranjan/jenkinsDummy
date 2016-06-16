@@ -12,9 +12,8 @@ def gitCredentials
 
 node('master') {
 	def masterWorkspace = pwd()
-	sh """mkdir -p "${masterWorkspace}"
-	"""
 	getConfigFile(serviceConfigBaseURL,"serviceConfig.groovy")
+	//get values using NonCPS as not serializable
 	def values = getValues(new File("${masterWorkspace}/serviceConfig.groovy"))
 	buildPublishTargetNode=values[0]
 	gitLoadTestURL=values[1]
@@ -44,6 +43,8 @@ currentBuild.setDescription("#artifactURL="+artifactURL+"#artifactVersion="+arti
     
 def getConfigFile(baseURL,fileName) {
     def workspace = pwd()
+	sh """mkdir -p "${workspace}"
+	"""
     def file = new File("${workspace}/${fileName}").newOutputStream()  
     file << new URL("${baseURL}/${fileName}").openStream()  
     file.close()

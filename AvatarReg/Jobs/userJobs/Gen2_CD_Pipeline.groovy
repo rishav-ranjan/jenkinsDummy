@@ -28,7 +28,6 @@ parallel(firstTask: {
 	//returned values
     loadTestCommitID = subJob2.description.tokenize('#')[2].tokenize('=')[1]
     })
-sleep(10)
 
 stage "AcceptanceStage"
 /*job2 = build  job: '../subJobs/Acceptance_functionalTest',

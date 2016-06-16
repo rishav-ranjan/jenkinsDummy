@@ -36,6 +36,8 @@ for (subnetNum=1;subnetNum<=subnetNums;subnetNum++) {
 
 def getConfigFile(baseURL,fileName) {
     def workspace = pwd()
+	sh """mkdir -p "${workspace}"
+	"""
     def file = new File("${workspace}/${fileName}").newOutputStream()  
     file << new URL("${baseURL}/${fileName}").openStream()  
     file.close()

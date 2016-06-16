@@ -7,8 +7,6 @@ def gitDeployURL
 def loadTestTargetNode
 node('master') {
 	def masterWorkspace = pwd()
-	sh """mkdir -p "${masterWorkspace}"
-	"""
 	getConfigFile(serviceConfigBaseURL,"serviceConfig.groovy")
 	serviceConfigFile = new File("${masterWorkspace}/serviceConfig.groovy")
 	def configObject = new ConfigSlurper().parse(serviceConfigFile.text)
@@ -44,6 +42,8 @@ sleep(10)
 				
 def getConfigFile(baseURL,fileName) {
     def workspace = pwd()
+		sh """mkdir -p "${workspace}"
+	"""
     def file = new File("${workspace}/${fileName}").newOutputStream()  
     file << new URL("${baseURL}/${fileName}").openStream()  
     file.close()
