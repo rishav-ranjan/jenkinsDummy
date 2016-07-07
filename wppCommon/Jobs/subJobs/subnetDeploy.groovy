@@ -8,13 +8,16 @@ import groovy.json.JsonSlurper
 //def serviceConfigPath = "/home/ec2-user/avregPipPilot/pipeline/services"
 //def amiID = "ami-0a6f966a"
 //def subnetNum
-
+//def environment="pie"
 
 def content
 def content2
 def slaveWorkspaceDir
 def masterWorkspace
-
+def subnet = "subnet${subnetNum}"
+def jsonInputFile
+def jsonWaitFile
+def jsonDetailsFile
 node(targetNode)
 {
 	//get slave workspace directory
@@ -22,11 +25,20 @@ node(targetNode)
 }
 node('master'){
 	masterWorkspace = pwd()
-	getConfigFile(serviceConfigBaseURL,"pideploy-${serviceName}-input${subnetNum}.json")
+	getConfigFile(serviceConfigBaseURL,"environment-config.json")
+	//get values from environment config file
+	File inputFile1 = new File("${masterWorkspace}/environment-config.json")
+	content=inputFile1.text
+	def slurped = new JsonSlurper().parseText(content)
+	jsonInputFile = slurped[ environment ][ subnet ].input
+	jsonWaitFile = slurped[ environment ][ subnet ].wait
+	jsonDetailsFile = slurped[ environment ][ subnet ].details
+	
+	getConfigFile(serviceConfigBaseURL,"${jsonInputFile}")
     //manipulate json file 1
-    File inputFile = new File("${masterWorkspace}/pideploy-${serviceName}-input${subnetNum}.json")
+    File inputFile = new File("${masterWorkspace}/${jsonInputFile}")
     content = inputFile.text
-    def slurped = new JsonSlurper().parseText(content)
+    slurped = new JsonSlurper().parseText(content)
     def builder = new JsonBuilder(slurped)
     builder.content.stack.parameters[2].value = "${amiID}"
     content = builder.toPrettyString()
@@ -40,39 +52,33 @@ node(targetNode) {
     git credentialsId: "${gitCredentials}", url: "${gitDeployURL}" 
 	
     //writing manipulated json to slave node
-    writeFile file: "pideploy-${serviceName}-input${subnetNum}.json", text: content
+    writeFile file: "${jsonInputFile}", text: content
     }
 node('master'){
     //fetching json file 2
-	getConfigFile(serviceConfigBaseURL,"wait-${serviceName}-input${subnetNum}.json")
-    //File inputFile = new File("${masterWorkspace}/wait-${serviceName}-input{subnetNum}.json")
-    //content = inputFile.text
-	stash includes: "wait-${serviceName}-input${subnetNum}.json", name: "wait-${serviceName}-input${subnetNum}.json"
+	getConfigFile(serviceConfigBaseURL,"${jsonWaitFile}")
+	stash includes: "${jsonWaitFile}", name: "${jsonWaitFile}"
 }
 
 node(targetNode){
     //writing json to slave node
-    //writeFile file: "wait-${serviceName}-input${subnetNum}.json", text: content
-	unstash "wait-${serviceName}-input${subnetNum}.json"
+	unstash "${jsonWaitFile}"
     }
 node('master'){
     //fetching json file 3
-	getConfigFile(serviceConfigBaseURL,"getStackDetails-${serviceName}${subnetNum}.json")
-    //File inputFile = new File("${masterWorkspace}/getStackDetails-${serviceName}${subnetNum}.json")
-    //content = inputFile.text
-	stash includes: "getStackDetails-${serviceName}${subnetNum}.json", name: "getStackDetails-${serviceName}${subnetNum}.json"
+	getConfigFile(serviceConfigBaseURL,"${jsonDetailsFile}")
+	stash includes: "${jsonDetailsFile}", name: "${jsonDetailsFile}"
 }
 
 
 node(targetNode){
 	//writing json to slave node
-    //writeFile file: "getStackDetails-${serviceName}${subnetNum}.json", text: content
-    unstash "getStackDetails-${serviceName}${subnetNum}.json"  
-    println "Deploying AvatarReg on 'PIE' stack. POD1-subnet1 with ami_id: ${amiID}"
-    /*sh """cd ${slaveWorkspaceDir}/chef-repos/aws-manager-repo
-    sudo chef-client -z -w -j ${slaveWorkspaceDir}/pideploy-${serviceName}-input${subnetNum}.json -r 'recipe[cloudformation::updateStack]' -l info
-    sudo chef-client -z -w -j ${slaveWorkspaceDir}/wait-${serviceName}-input${subnetNum}.json  -r 'recipe[cloudformation::waitForStackReady]' -l info
-    sudo chef-client -z -w -j ${slaveWorkspaceDir}/getStackDetails-${serviceName}${subnetNum}.json -r 'recipe[cloudformation::getStackOutputs]' -l info
+    unstash "${jsonDetailsFile}"  
+    println "Deploying ${serviceName} on ${environment} stack. POD1-${subnet} with ami_id: ${amiID}"
+	/*sh """cd ${slaveWorkspaceDir}/chef-repos/aws-manager-repo
+    sudo chef-client -z -w -j ${slaveWorkspaceDir}/${jsonInputFile} -r 'recipe[cloudformation::updateStack]' -l info
+    sudo chef-client -z -w -j ${slaveWorkspaceDir}/${jsonWaitFile}  -r 'recipe[cloudformation::waitForStackReady]' -l info
+    sudo chef-client -z -w -j ${slaveWorkspaceDir}/${jsonDetailsFile} -r 'recipe[cloudformation::getStackOutputs]' -l info
     """*/
     def amiContent = "ami_id=${amiID}"
     writeFile file: "${serviceName}.log.amiid.tag", text: amiContent

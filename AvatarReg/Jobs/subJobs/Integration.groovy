@@ -4,7 +4,7 @@ def parentstageName = "Integration"
 def deployAmiTargetNode
 def gitCredentials
 def gitDeployURL
-
+def environment = "pie"
 
 node('master') {
 	def masterWorkspace = pwd()
@@ -30,6 +30,7 @@ for (subnetNum=1;subnetNum<=subnetNums;subnetNum++) {
 					[$class: 'StringParameterValue', name: 'subnetNum', value: subnetNum.toString() ],
 				    [$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL],
 				    [$class: 'StringParameterValue', name: 'targetNode', value: deployAmiTargetNode ],
+					[$class: 'StringParameterValue', name: 'environment', value: environment ],
             ];
 }
 

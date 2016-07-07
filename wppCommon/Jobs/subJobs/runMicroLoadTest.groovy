@@ -2,8 +2,9 @@
 //serviceConfigBaseURL  eg  "file:///home/ec2-user/config/avreg"
 //targetNode  eg  "MicroLoadTest"
 
+/*
 node('master') {
-    getConfigFile(serviceConfigBaseURL,"build.xml")
+   getConfigFile(serviceConfigBaseURL,"build.xml")
     getConfigFile(serviceConfigBaseURL,"cho-properties.xml")
     getConfigFile(serviceConfigBaseURL,"loadTest.properties")
     getConfigFile(serviceConfigBaseURL,"default-properties.xml")
@@ -13,15 +14,17 @@ node('master') {
     stash includes: 'loadTest.properties', name: 'loadTest.properties'
     stash includes: 'default-properties.xml', name: 'default-properties.xml'
 }
+*/
 
 node(targetNode) {
-    unstash 'build.xml'
+   /* unstash 'build.xml'
     unstash 'cho-properties.xml'
     unstash 'loadTest.properties'
     unstash 'default-properties.xml'
-                
+       */         
     //ant
-    sh "ant"
+    sh "cd /home/ec2-user/workspace/MicroLoadTestPilot2
+        nohup ant &"
 }
 
 def getConfigFile(baseURL,fileName) {

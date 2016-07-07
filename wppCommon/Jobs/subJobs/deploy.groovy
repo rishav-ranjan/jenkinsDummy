@@ -17,7 +17,7 @@ def logName
 def temp_dir
 def SlaveWorkspaceDir
 def masterWorkspace
-
+def instanceID
 
 
 node('master'){
@@ -77,16 +77,15 @@ node (targetNode){
 	
     //get instance id
     def inst_id = readFile file: "${tempDir}/${logName}.instid"
-    def instanceID = inst_id.trim()
+    instanceID = inst_id.trim()
     println "${serviceName} Instance ID is ${instanceID}"
 	
 	//secure copy databag
     sh "sudo scp -q -o StrictHostKeyChecking=no  -i ${key} /opt/keyfiles/stage/${serviceName}/encrypted_data_bag_secret ec2-user@${ip_addr}:${secret_file}"
-    
-    //outgoing parameters- BUILD_TIMESTAMP,instanceID
-    currentBuild.setDescription("#instanceID="+instanceID)
- 
 }
+
+//outgoing parameters- instanceID
+currentBuild.setDescription("#instanceID="+instanceID)
 
 def getConfigFile(baseURL,fileName) {
     def workspace = pwd()
