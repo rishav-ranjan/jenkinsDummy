@@ -35,11 +35,10 @@ stage "${parentstageName}::BuildAndPublish"
                     ] ;
     
     // Return Values
-    def artifactURL = subJob1.description.tokenize('#')[0].tokenize('=')[1]
-    def artifactVersion = subJob1.description.tokenize('#')[1].tokenize('=')[1]
-    def commitID = subJob1.description.tokenize('#')[2].tokenize('=')[1]
+    def artifactVersion = subJob1.description.tokenize('#')[0].tokenize('=')[1]
+    def commitID = subJob1.description.tokenize('#')[1].tokenize('=')[1]
     
-currentBuild.setDescription("#artifactURL="+artifactURL+"#artifactVersion="+artifactVersion+"#commitID="+commitID)
+currentBuild.setDescription("#artifactVersion="+artifactVersion+"#commitID="+commitID)
     
 def getConfigFile(baseURL,fileName) {
     def workspace = pwd()

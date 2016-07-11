@@ -10,7 +10,7 @@ import groovy.json.JsonSlurper
 //def serviceConfigPath = "/home/ec2-user/avregPipPilot/pipeline/services"
 //def targetNode = 'AMIBuilder'
 //def artifactVersion
-
+//def timestamp
 
 def amiName="${serviceName}_${artifactVersion}"
 def amiID
@@ -27,15 +27,16 @@ node(targetNode)
 node('master')
 {
 	masterWorkspace = pwd()
-	getConfigFile(serviceConfigBaseURL,"create_ami_${serviceName}.json")
+	getConfigFile(serviceConfigBaseURL,"create_ami.json")
     //manipulating json file 1
-    File inputFile = new File("${masterWorkspace}/create_ami_${serviceName}.json")
+    File inputFile = new File("${masterWorkspace}/create_ami.json")
     content = inputFile.text
     def slurped = new JsonSlurper().parseText(content)
     tempDir = slurped.log.temp_dir
 	def amiTags = slurped.aws.ami.tags[0].value
-	amiTags = amiTags.replaceAll(~/cookbookVersion/, "${cookbookVersion}")
-	amiTags = amiTags.replaceAll(~/artifactVersion/,"${artifactVersion}")
+	amiTags = amiTags.replaceAll(~/COOKBOOKVERSION/, "${cookbookVersion}")
+	amiTags = amiTags.replaceAll(~/ARTIFACTVERSION/,"${artifactVersion}")
+	amiTags = amiTags.replaceAll(~/TIMESTAMP/,"${timestamp}")
     def builder = new JsonBuilder(slurped)
     builder.content.aws.ami.tags[1].value="${commitID}"
     builder.content.aws.instance.id="${instanceID}"
@@ -49,18 +50,18 @@ node(targetNode)
 {	
 	//git checkout before writeFile
     git credentialsId: "$gitCredentials", url: "$url"   
-    writeFile file: "create_ami_${serviceName}.json", text: content
+    writeFile file: "create_ami.json", text: content
 	
 	//run create AMI from instance recipe
     sh """cd ${slaveWorkspaceDir}/chef-repos/aws-manager-repo/cookbooks
-    sudo chef-client -z -j ${slaveWorkspaceDir}/create_ami_${serviceName}.json -r 'recipe[ec2::createAMIFromInstance]' --log_level info"""
+    sudo chef-client -z -j ${slaveWorkspaceDir}/create_ami.json -r 'recipe[ec2::createAMIFromInstance]' --log_level info"""
 }
 
 node('master')
 {
-	getConfigFile(serviceConfigBaseURL,"terminate_instance_${serviceName}.json")
+	getConfigFile(serviceConfigBaseURL,"terminate_instance.json")
     //manipulating json file 2
-    File inputFile2 = new File("${masterWorkspace}/terminate_instance_${serviceName}.json")
+    File inputFile2 = new File("${masterWorkspace}/terminate_instance.json")
     content = inputFile2.text
     def slurped2 = new JsonSlurper().parseText(content)
     def builder2 = new JsonBuilder(slurped2)
@@ -71,11 +72,11 @@ node('master')
 
 node(targetNode)
 {
-    writeFile file: "terminate_instance_${serviceName}.json", text: content
+    writeFile file: "terminate_instance.json", text: content
 	
 	//run terminate instance recipe
     sh """cd ${slaveWorkspaceDir}/chef-repos/aws-manager-repo/cookbooks
-    sudo chef-client -z -j ${slaveWorkspaceDir}/terminate_instance_${serviceName}.json -r 'recipe[ec2::terminateInstance]' --log_level info"""
+    sudo chef-client -z -j ${slaveWorkspaceDir}/terminate_instance.json -r 'recipe[ec2::terminateInstance]' --log_level info"""
 	
 	//get AMI ID from log file
     def content = readFile file: "${tempDir}/${serviceName}.log.serviceami"

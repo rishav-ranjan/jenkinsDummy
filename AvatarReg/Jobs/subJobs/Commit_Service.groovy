@@ -43,9 +43,9 @@ stage "${parentstageName}::BuildAndPublish"
                     ] ;
     
     // Returned Values
-    def artifactURL = subJob1.description.tokenize('#')[0].tokenize('=')[1]
-    def artifactVersion = subJob1.description.tokenize('#')[1].tokenize('=')[1]
-    def commitID = subJob1.description.tokenize('#')[2].tokenize('=')[1]
+    def artifactVersion = subJob1.description.tokenize('#')[0].tokenize('=')[1]
+    def commitID = subJob1.description.tokenize('#')[1].tokenize('=')[1]
+	def timestamp = subJob1.description.tokenize('#')[2].tokenize('=')[1]
 
     
 stage "${parentstageName}::Deploy"
@@ -55,14 +55,13 @@ stage "${parentstageName}::Deploy"
 							[$class: 'StringParameterValue', name: 'url', value: gitDeployURL ],
 							[$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
 							[$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
-							[$class: 'StringParameterValue', name: 'artifactURL', value: artifactURL ],
+							[$class: 'StringParameterValue', name: 'artifactVersion', value: artifactVersion ],
 							[$class: 'StringParameterValue', name: 'targetNode', value: deployAmiTargetNode ],
 							[$class: 'StringParameterValue', name: 'cookbookVersion', value: cookbookVersion ],
                     ] ;
                     
     // Returned Values                
     def instanceID = subJob2.description.tokenize('#')[0].tokenize('=')[1]
-    println "the values are ${artifactURL}\t${artifactVersion}\t${instanceID}"
     
     
     
@@ -78,6 +77,7 @@ stage "${parentstageName}::CreateAMI"
 							[$class: 'StringParameterValue', name: 'commitID', value: commitID ],
 							[$class: 'StringParameterValue', name: 'targetNode', value: deployAmiTargetNode ],
 							[$class: 'StringParameterValue', name: 'cookbookVersion', value: cookbookVersion ],
+							[$class: 'StringParameterValue', name: 'timestamp', value: timestamp ]
                     ] ;
 					
     // Returned Values                

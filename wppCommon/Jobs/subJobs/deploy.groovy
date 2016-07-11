@@ -6,9 +6,9 @@ import groovy.json.JsonSlurper
 //def gitCredentials = "8cf0000b-3991-4db0-a2d9-e157168d2cef"
 //def serviceName="avreg"
 //def serviceConfigBaseURL
-//def artifactURL
 //def targetNode = 'AMIBuilder'
 //def cookbookVersion="1.0.16"
+//def artifactVersion
 
 def key
 def secret_file
@@ -22,12 +22,14 @@ def instanceID
 
 node('master'){
 	masterWorkspace = pwd()
-	getConfigFile(serviceConfigBaseURL,"deploy_${serviceName}_input.json")
+	getConfigFile(serviceConfigBaseURL,"deploy_input.json")
     //manipulate json file 1
-    File inputFile = new File("${masterWorkspace}/deploy_${serviceName}_input.json")
+    File inputFile = new File("${masterWorkspace}/deploy_input.json")
     content = inputFile.text
     def slurped = new JsonSlurper().parseText(content)
     secret_file = slurped.secretFile
+	def artifactURL = slurped.service.artifact_url
+	artifactURL=artifactURL.replaceAll(~/POMVERSION/, "${artifactVersion}")
     println "Secret file is ${secret_file}"
     def builder = new JsonBuilder(slurped)
     builder.content.service.artifact_url = "${artifactURL}"
@@ -45,20 +47,20 @@ node(targetNode){
     slaveWorkspaceDir = pwd()
 			
 	//write manipulated json to slave
-    writeFile file: "deploy_${serviceName}_input.json", text: content
+    writeFile file: "deploy_input.json", text: content
 }
 
 node('master'){
-	getConfigFile(serviceConfigBaseURL,"deploy_${serviceName}.json")
+	getConfigFile(serviceConfigBaseURL,"deploy.json")
 	//manipulate json file 2
-	File inputFile2 = new File("${masterWorkspace}/deploy_${serviceName}.json")
+	File inputFile2 = new File("${masterWorkspace}/deploy.json")
     content = inputFile2.text
     def slurped2 = new JsonSlurper().parseText(content)
     key=slurped2.aws.instance.key.local_path
 	def inputURL=slurped2.service.cookbook.url
-	inputURL=inputURL.replaceAll(~/cookbookVersion/, "${cookbookVersion}")
+	inputURL=inputURL.replaceAll(~/COOKBOOKVERSION/, "${cookbookVersion}")
 	def databagURL=slurped2.service.env_databag_url
-	databagURL=databagURL.replaceAll(~/cookbookVersion/, "${cookbookVersion}")
+	databagURL=databagURL.replaceAll(~/COOKBOOKVERSION/, "${cookbookVersion}")
     println "AWS key is ${key}"
     logName=slurped2.log.name
     tempDir=slurped2.log.temp_dir
@@ -71,11 +73,11 @@ node('master'){
 
 node (targetNode){
 	//write manipulated json to slave
-    writeFile file: "deploy_${serviceName}.json", text: content
+    writeFile file: "deploy.json", text: content
 	
 	//run deploy service recipe
     sh """ cd ${slaveWorkspaceDir}/chef-repos/aws-manager-repo/cookbooks
-           sudo chef-client -z -j ${slaveWorkspaceDir}/deploy_${serviceName}.json -r 'recipe[ec2::deployService]' --log_level info
+           sudo chef-client -z -j ${slaveWorkspaceDir}/deploy.json -r 'recipe[ec2::deployService]' --log_level info
        """
 	   
     //get deployment IP

@@ -24,26 +24,12 @@ node(targetNode){
 	//maven evaluate POM values
     sh """
     ${mvnpath} -f ${workspaceDir}/${rootPomPath} org.apache.maven.plugins:maven-help-plugin:2.2:evaluate -Dexpression=project.version  | grep Building | cut -d' ' -f4 > maven.version
-    ${mvnpath} -f ${workspaceDir}/${rootPomPath} org.apache.maven.plugins:maven-help-plugin:2.2:evaluate -Dexpression=project.groupId  | grep -v INFO | grep -i -v WARNING > ${workspaceDir}/maven.groupId
-	${mvnpath} -f ${workspaceDir}/${rootPomPath} org.apache.maven.plugins:maven-help-plugin:2.2:evaluate -Dexpression=project.artifactId  | grep -v INFO | grep -i -v WARNING > ${workspaceDir}/maven.artifactId
-	${mvnpath} -f ${workspaceDir}/${rootPomPath} org.apache.maven.plugins:maven-help-plugin:2.2:evaluate -Dexpression=project.distributionManagement.repository.url  | grep -v INFO | grep -i -v WARNING > ${workspaceDir}/maven.repoUrl"""
+"""
     
-    groupID = readFile file: "${workspaceDir}/maven.groupId"
-	artifactID = readFile file: "${workspaceDir}/maven.artifactId"
 	version = readFile file: "${workspaceDir}/maven.version"
-	repoURL = readFile file: "${workspaceDir}/maven.repoUrl"
-	
-	groupID=groupID.trim()
-	groupIdSlashed = groupID.replaceAll('\\.','/')
-	artifactID=artifactID.trim()
 	version=version.trim()
-	repoURL = repoURL.trim()
 
     artifactVersion = "${version}-${buildTrigger}-${buildTimestamp}"
-    echo "version ${version}"
-    echo "groupID ${groupID}"
-    echo "artifactID ${artifactID}"
-    echo "repoURL ${repoURL}"
 
     
     //pre-build steps    
@@ -53,17 +39,11 @@ node(targetNode){
     commitID =commitID.trim()
     println "commit_id is ${commitID}"
 
-    
-    
     //build and deploy step
     sh "${mvnpath} -B -f ${workspaceDir}/${rootPomPath}/pom.xml deploy cobertura:cobertura -Dcobertura.report.format=xml"
-    
-    def fileName = "${serviceName}-restapp-${artifactVersion}.war"
-    def artifactURL = "${repoURL}/${groupIdSlashed}/${serviceName}-restapp/${artifactVersion}/${fileName}"
-    println artifactURL
-	
-	//return values - artifactURL, artifactVersion, commitID
-    currentBuild.setDescription("#artifactURL="+artifactURL+"#artifactVersion="+artifactVersion+"#commitID="+commitID)
+
+	//return values - artifactVersion, commitID
+    currentBuild.setDescription("#artifactVersion="+artifactVersion+"#commitID="+commitID+"#timestamp="+buildTimestamp)
 }
 
 
