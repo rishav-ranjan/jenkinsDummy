@@ -21,7 +21,7 @@ node('master') {
 def subnetNums=2
 for (subnetNum=1;subnetNum<=subnetNums;subnetNum++) {
 	stage "${parentstageName}::DeploySubnet ${subnetNum}"
-	subJob = build  job: '../../wppCommon/subJobs/subnetDeploy',
+	subJob = build  job: '../subJobs/subnetDeploy',
             parameters: [
 					[$class: 'StringParameterValue', name: 'gitCredentials', value: gitCredentials ],
 				    [$class: 'StringParameterValue', name: 'gitDeployURL', value: gitDeployURL ],

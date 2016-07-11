@@ -1,6 +1,6 @@
 //incoming parameters - serviceName, buildTrigger
 
-def serviceConfigBaseURL = "file:///jdata/jenkins/pipelineConfig/avreg"
+def serviceConfigBaseURL = "file:///jdata/jenkins/pipelineConfig/${serviceName}"
 def amiID
 def serviceCommitID
 def loadTestCommitID
@@ -8,7 +8,7 @@ def loadTestCommitID
 stage "CommitStage"
 
 parallel(firstTask: {
-    subJob1 = build  job: '../subJobs/Commit_Service',
+    subJob1 = build  job: '../subUserJobs/Commit_Service',
                 parameters: [
                         [$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
                         [$class: 'StringParameterValue', name: 'buildTrigger', value: buildTrigger ],
@@ -19,7 +19,7 @@ parallel(firstTask: {
     serviceCommitID = subJob1.description.tokenize('#')[1].tokenize('=')[1]
     }, 
     secondTask: {
-    subJob2 = build job: '../subJobs/Commit_loadTest',
+    subJob2 = build job: '../subUserJobs/Commit_loadTest',
                 parameters: [
                         [$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
                         [$class: 'StringParameterValue', name: 'buildTrigger', value: buildTrigger ],
@@ -30,7 +30,7 @@ parallel(firstTask: {
     })
 
 stage "AcceptanceStage"
-/*job2 = build  job: '../subJobs/Acceptance_functionalTest',
+/*job2 = build  job: '../subUserJobs/Acceptance_functionalTest',
             parameters: [
 					[$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
 					[$class: 'StringParameterValue', name: 'amiID', value: amiID ],
@@ -40,7 +40,7 @@ sleep(10)
 
 
 stage "CapacityStage"
-job2 = build  job: '../subJobs/Capacity_loadTest',
+job2 = build  job: '../subUserJobs/Capacity_loadTest',
             parameters: [
 					[$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
 					[$class: 'StringParameterValue', name: 'amiID', value: amiID ],
@@ -50,7 +50,7 @@ job2 = build  job: '../subJobs/Capacity_loadTest',
 
 
 stage "IntegrationStage"
-job3 = build  job: '../subJobs/Integration',
+job3 = build  job: '../subUserJobs/Integration',
             parameters: [
 					[$class: 'StringParameterValue', name: 'serviceName', value: serviceName ],
 					[$class: 'StringParameterValue', name: 'amiID', value: amiID ],

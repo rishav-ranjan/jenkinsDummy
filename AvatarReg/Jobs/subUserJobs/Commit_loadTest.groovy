@@ -24,7 +24,7 @@ node('master') {
 
 stage "${parentstageName}::BuildAndPublish"
 
-    subJob1 = build  job: '../../wppCommon/subJobs/buildAndPublish',
+    subJob1 = build  job: '../subJobs/buildAndPublish',
                     parameters: [
 							[$class: 'StringParameterValue', name: 'gitCredentials', value: gitCredentials ],
 							[$class: 'StringParameterValue', name: 'url', value: gitLoadTestURL ],

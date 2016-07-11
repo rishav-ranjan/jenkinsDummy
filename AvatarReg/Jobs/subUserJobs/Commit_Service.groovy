@@ -32,7 +32,7 @@ node('master') {
 
 stage "${parentstageName}::BuildAndPublish"
 
-    subJob1 = build  job: '../../wppCommon/subJobs/buildAndPublish',
+    subJob1 = build  job: '../subJobs/buildAndPublish',
                     parameters: [
                         [$class: 'StringParameterValue', name: 'gitCredentials', value: gitCredentials ],
                         [$class: 'StringParameterValue', name: 'url', value: gitServiceURL ],
@@ -49,7 +49,7 @@ stage "${parentstageName}::BuildAndPublish"
 
     
 stage "${parentstageName}::Deploy"
-    subJob2 = build  job: '../../wppCommon/subJobs/deploy',
+    subJob2 = build  job: '../subJobs/deploy',
                     parameters: [
 							[$class: 'StringParameterValue', name: 'gitCredentials', value: gitCredentials ],
 							[$class: 'StringParameterValue', name: 'url', value: gitDeployURL ],
@@ -66,7 +66,7 @@ stage "${parentstageName}::Deploy"
     
     
 stage "${parentstageName}::CreateAMI"
-    subJob3 = build  job: '../../wppCommon/subJobs/createAMI',
+    subJob3 = build  job: '../subJobs/createAMI',
                      parameters: [
 							[$class: 'StringParameterValue', name: 'gitCredentials', value: gitCredentials ],
 							[$class: 'StringParameterValue', name: 'url', value: gitDeployURL ],
