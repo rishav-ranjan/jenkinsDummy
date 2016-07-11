@@ -26,7 +26,7 @@ parallel(firstTask: {
                         [$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
                 ];
 	//returned values
-    loadTestCommitID = subJob2.description.tokenize('#')[2].tokenize('=')[1]
+    loadTestCommitID = subJob2.description.tokenize('#')[1].tokenize('=')[1]
     })
 
 stage "AcceptanceStage"
