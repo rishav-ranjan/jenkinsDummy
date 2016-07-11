@@ -9,6 +9,7 @@ def rootPomPath
 def gitServiceURL
 def gitCredentials
 def gitLoadTestURL
+def cookbookVersion
 def parentstageName = "Commit"
 
 node('master') {
@@ -25,6 +26,7 @@ node('master') {
 	gitLoadTestURL=configObject.gitLoadTestURL
 	gitCredentials=configObject.gitCredentials
 	rootPomPath=configObject.serviceRootPomPath
+	cookbookVersion=configObject.cookbookVersion
 	configObject = null
 }
 
@@ -55,6 +57,7 @@ stage "${parentstageName}::Deploy"
 							[$class: 'StringParameterValue', name: 'serviceConfigBaseURL', value: serviceConfigBaseURL ],
 							[$class: 'StringParameterValue', name: 'artifactURL', value: artifactURL ],
 							[$class: 'StringParameterValue', name: 'targetNode', value: deployAmiTargetNode ],
+							[$class: 'StringParameterValue', name: 'cookbookVersion', value: cookbookVersion ],
                     ] ;
                     
     // Returned Values                
@@ -74,6 +77,7 @@ stage "${parentstageName}::CreateAMI"
 							[$class: 'StringParameterValue', name: 'instanceID', value: instanceID ],
 							[$class: 'StringParameterValue', name: 'commitID', value: commitID ],
 							[$class: 'StringParameterValue', name: 'targetNode', value: deployAmiTargetNode ],
+							[$class: 'StringParameterValue', name: 'cookbookVersion', value: cookbookVersion ],
                     ] ;
 					
     // Returned Values                

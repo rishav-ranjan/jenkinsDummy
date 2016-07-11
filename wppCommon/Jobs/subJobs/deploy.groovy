@@ -8,7 +8,7 @@ import groovy.json.JsonSlurper
 //def serviceConfigBaseURL
 //def artifactURL
 //def targetNode = 'AMIBuilder'
-
+//def cookbookVersion="1.0.16"
 
 def key
 def secret_file
@@ -55,10 +55,18 @@ node('master'){
     content = inputFile2.text
     def slurped2 = new JsonSlurper().parseText(content)
     key=slurped2.aws.instance.key.local_path
+	def inputURL=slurped2.service.cookbook.url
+	inputURL=inputURL.replaceAll(~/cookbookVersion/, "${cookbookVersion}")
+	def databagURL=slurped2.service.env_databag_url
+	databagURL=databagURL.replaceAll(~/cookbookVersion/, "${cookbookVersion}")
     println "AWS key is ${key}"
     logName=slurped2.log.name
     tempDir=slurped2.log.temp_dir
     println "logName is ${logName}"
+	def builder = new JsonBuilder(slurped2)
+	builder.content.service.cookbook.url="${inputURL}"
+	builder.content.service.env_databag_url="${databagURL}"
+	content = builder.toPrettyString()
 }
 
 node (targetNode){

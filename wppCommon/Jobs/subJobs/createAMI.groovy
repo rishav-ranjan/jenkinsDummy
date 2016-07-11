@@ -11,11 +11,6 @@ import groovy.json.JsonSlurper
 //def targetNode = 'AMIBuilder'
 //def artifactVersion
 
-//variables specific to json file
-def cookbookVersion="1.0.13"
-def appconfig_version="nil"
-def db_version="nil"
-def db_cookbook_version="nil"
 
 def amiName="${serviceName}_${artifactVersion}"
 def amiID
@@ -38,10 +33,14 @@ node('master')
     content = inputFile.text
     def slurped = new JsonSlurper().parseText(content)
     tempDir = slurped.log.temp_dir
+	def amiTags = slurped.aws.ami.tags[0].value
+	amiTags = amiTags.replaceAll(~/cookbookVersion/, "${cookbookVersion}")
+	amiTags = amiTags.replaceAll(~/artifactVersion/,"${artifactVersion}")
     def builder = new JsonBuilder(slurped)
     builder.content.aws.ami.tags[1].value="${commitID}"
     builder.content.aws.instance.id="${instanceID}"
     builder.content.aws.ami.name="${amiName}"
+	builder.content.aws.ami.tags[0].value="${amiTags}"
     content = builder.toPrettyString()
     builder=null
 }
