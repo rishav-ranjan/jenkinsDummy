@@ -68,6 +68,7 @@ node('master'){
 	def builder = new JsonBuilder(slurped2)
 	builder.content.service.cookbook.url="${inputURL}"
 	builder.content.service.env_databag_url="${databagURL}"
+	builder.content.service.cookbook.input_json_local_path="${slaveWorkspaceDir}/deploy_input.json"
 	content = builder.toPrettyString()
 }
 
